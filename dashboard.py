@@ -8,10 +8,10 @@ st.set_page_config(layout="wide")
 # ===== LOAD DATA =====
 @st.cache_data
 def load_data():
-    df_D05 = pd.read_csv(r"C:\Users\MSI\Downloads\Big Data\AMA301_2511_1_D05.csv", encoding="utf-8-sig")
-    df_D12 = pd.read_csv(r"C:\Users\MSI\Downloads\Big Data\AMA301_2511_1_D12.csv", encoding="utf-8-sig")
-    df_D13 = pd.read_csv(r"C:\Users\MSI\Downloads\Big Data\AMA301_2511_1_D13.csv", encoding="utf-8-sig")
-    df_D14 = pd.read_csv(r"C:\Users\MSI\Downloads\Big Data\AMA301_2511_1_D14.csv", encoding="utf-8-sig")
+df_D05 = pd.read_csv("AMA301_2511_1_D05.csv")
+df_D12 = pd.read_csv("AMA301_2511_1_D12.csv")
+df_D13 = pd.read_csv("AMA301_2511_1_D13.csv")
+df_D14 = pd.read_csv("AMA301_2511_1_D14.csv")
 
     df_D05["Lớp"] = "D05"
     df_D12["Lớp"] = "D12"
