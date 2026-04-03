@@ -1,3 +1,5 @@
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,6 +9,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+
 color_map = {
     "D05": "#F5793A",
     "D12": "#A95AA1",
@@ -90,6 +93,7 @@ selected_type_sidebar = st.sidebar.selectbox(
     "Chọn xếp loại",
     ["Tất cả", "Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"]
 ) 
+
 filtered_df = df[
     (df["Lớp"].isin(selected_class)) &
     (df["Điểm_tổng_hợp"] >= min_score) &
@@ -97,6 +101,7 @@ filtered_df = df[
 ]
 if selected_type_sidebar != "Tất cả":
     filtered_df = filtered_df[filtered_df["Xếp loại"] == selected_type_sidebar]
+
 # ===== TITLE =====
 st.title("📊 PHÂN TÍCH ĐIỂM SINH VIÊN (D05, D12, D13, D14)")
 
@@ -111,89 +116,57 @@ max_score = filtered_df["Điểm_tổng_hợp"].max()
 col3.metric("Cao nhất", max_score if not pd.isna(max_score) else 0)
 col4.metric("Tổng SV", filtered_df.shape[0])
 
-# ===== RANKING =====
+# ===== RANKING (Đã chuyển sang Plotly chuẩn) =====
 st.subheader("🏆 Xếp hạng lớp")
-avg_class = filtered_df.groupby("Lớp")["Điểm_tổng_hợp"].mean().sort_values(ascending=False)
+avg_class = filtered_df.groupby("Lớp")["Điểm_tổng_hợp"].mean().reset_index()
+avg_class = avg_class.sort_values(by="Điểm_tổng_hợp", ascending=False)
 
-fig_rank, ax_rank = plt.subplots(figsize=(8, 4))
-# Lấy màu tương ứng với từng lớp để vẽ
-colors = [color_map.get(lop, "#888888") for lop in avg_class.index]
-
-avg_class.plot(
-    kind='bar', 
-    ax=ax_rank, 
-    color=colors, 
-    edgecolor='black', # Viền đen cho cột
-    linewidth=1.2
+fig_rank = px.bar(
+    avg_class, 
+    x="Lớp", 
+    y="Điểm_tổng_hợp",
+    color="Lớp",
+    color_discrete_map=color_map,
+    text_auto='.2f', 
+    title="Xếp hạng Điểm trung bình theo lớp"
 )
+fig_rank.update_traces(marker_line_color='black', marker_line_width=1.2)
+st.plotly_chart(fig_rank, use_container_width=True)
 
-ax_rank.set_ylabel("Điểm TB")
-plt.xticks(rotation=0) # Cho tên lớp nằm ngang
-ax_rank.grid(True, linestyle='--', alpha=0.5, axis='y')
-st.pyplot(fig_rank)
-
-# ===== HISTOGRAM =====
+# ===== HISTOGRAM (Đã chuyển sang Plotly chuẩn) =====
 st.subheader("📈 Phân bố điểm")
 
-fig, ax = plt.subplots()
-for lop in selected_class:
-    subset = filtered_df[filtered_df["Lớp"] == lop]
-    if len(subset) > 0:
-ax.hist(
-            subset["Điểm_tổng_hợp"],
-            bins=10,
-            alpha=0.6,
-            label=lop,
-            color=color_map.get(lop),
-            edgecolor='black', # Thêm viền đen cho các cột
-            linewidth=1.2      # Độ dày viền
-        )
-ax.legend(title="Lớp", frameon=True, edgecolor='black')
-ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+fig_hist = px.histogram(
+    filtered_df, 
+    x="Điểm_tổng_hợp", 
+    color="Lớp",
+    color_discrete_map=color_map,
+    nbins=20,
+    barmode="overlay",
+    opacity=0.7,
+    title="Phân bố điểm tổng hợp theo lớp"
+)
+fig_hist.update_traces(marker_line_color='black', marker_line_width=1)
+st.plotly_chart(fig_hist, use_container_width=True)
 
-# --- Phần Thêm mới để làm đẹp ---
-ax.set_title("Phân bố điểm tổng hợp theo lớp", fontsize=14, fontweight='bold', pad=15)
-ax.set_xlabel("Điểm tổng hợp", fontweight='bold')
-ax.set_ylabel("Số lượng sinh viên", fontweight='bold')
-ax.grid(True, linestyle='--', alpha=0.5) # Thêm lưới dễ nhìn
-for spine in ax.spines.values(): # Thêm đường viền đen xung quanh
-    spine.set_edgecolor('black')
-    spine.set_linewidth(1)
-# ---------------------------------
 
-st.pyplot(fig)
-
-# ===== BOXPLOT =====
+# ===== BOXPLOT (Đã chuyển sang Plotly chuẩn) =====
 st.subheader("📦 Boxplot")
 
-fig2, ax2 = plt.subplots()
-valid_classes = [lop for lop in selected_class if len(filtered_df[filtered_df["Lớp"] == lop]) > 0]
-data = [filtered_df[filtered_df["Lớp"] == lop]["Điểm_tổng_hợp"] for lop in valid_classes]
-box = ax2.boxplot(
-    data,
-    labels=valid_classes,
-    patch_artist=True,
-    medianprops=dict(color='black', linewidth=2),
-    boxprops=dict(linewidth=1.5),
-    whiskerprops=dict(linewidth=1.5),
-    capprops=dict(linewidth=1.5)
+fig_box = px.box(
+    filtered_df, 
+    x="Lớp", 
+    y="Điểm_tổng_hợp", 
+    color="Lớp",
+    color_discrete_map=color_map,
+    points="all", 
+    title="Biểu đồ Boxplot: Khoảng phân tán điểm"
 )
-for patch, lop in zip(box['boxes'], selected_class):
-    patch.set_facecolor(color_map.get(lop))
+fig_box.update_traces(marker_line_color='black', marker_line_width=1)
+st.plotly_chart(fig_box, use_container_width=True)
 
-# --- Phần Thêm mới để làm đẹp ---
-ax2.set_title("Biểu đồ Boxplot: Khoảng phân tán điểm", fontsize=14, fontweight='bold', pad=15)
-ax2.set_xlabel("Lớp học", fontweight='bold')
-ax2.set_ylabel("Điểm tổng hợp", fontweight='bold')
-ax2.grid(True, linestyle='--', alpha=0.5, axis='y') # Chỉ bật lưới ngang cho Boxplot
-for spine in ax2.spines.values():
-    spine.set_edgecolor('black')
-    spine.set_linewidth(1)
-# ---------------------------------
 
-st.pyplot(fig2)
-
-# ===== SCATTER =====
+# ===== SCATTER (Giữ nguyên Matplotlib/Seaborn vì vẽ đường hồi quy rất tốt) =====
 st.subheader("🔍 Tương quan")
 
 fig3, ax3 = plt.subplots()
@@ -211,7 +184,6 @@ sns.scatterplot(
 sns.regplot(
     data=scatter_df, x="Thi_cuối_kì", y="Điểm_tổng_hợp", scatter=False, color="black", ax=ax3)
 
-# --- Phần Thêm mới để làm đẹp ---
 ax3.set_title("Tương quan giữa Điểm thi cuối kì và Điểm tổng hợp", fontsize=14, fontweight='bold', pad=15)
 ax3.set_xlabel("Điểm thi cuối kì", fontweight='bold')
 ax3.set_ylabel("Điểm tổng hợp", fontweight='bold')
@@ -220,10 +192,10 @@ ax3.grid(True, linestyle='--', alpha=0.5)
 for spine in ax3.spines.values():
     spine.set_edgecolor('black')
     spine.set_linewidth(1)
-# ---------------------------------
 
 st.pyplot(fig3)
-# ===== HEATMAP =====
+
+# ===== HEATMAP (Giữ nguyên Matplotlib/Seaborn) =====
 st.subheader("📊 Heatmap")
 
 corr_df = filtered_df[[
@@ -237,60 +209,34 @@ corr_df = filtered_df[[
 corr = corr_df.corr()
 
 fig4, ax4 = plt.subplots()
-sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", ax=ax4, linewidths=0.5, linecolor='black') # Thêm viền cho các ô
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", ax=ax4, linewidths=0.5, linecolor='black') 
 
-# --- Phần Thêm mới để làm đẹp ---
 ax4.set_title("Ma trận tương quan giữa các thành phần điểm", fontsize=14, fontweight='bold', pad=15)
-plt.xticks(rotation=45, ha='right') # Xoay nhãn trục X để không bị đè lên nhau
-# ---------------------------------
+plt.xticks(rotation=45, ha='right') 
 
 st.pyplot(fig4)
 
-# ===== PHÂN LOẠI =====
-st.subheader("📊 Phân loại")
+# ===== PHÂN LOẠI (Đã dọn dẹp lỗi và chuyển sang Plotly chuẩn) =====
+st.subheader("📊 Phân loại sinh viên")
 
-fig_class, ax_class = plt.subplots(figsize=(8, 5))
-crosstab_df = pd.crosstab(filtered_df["Lớp"], filtered_df["Xếp loại"]).fillna(0)
+crosstab_df = pd.crosstab(filtered_df["Lớp"], filtered_df["Xếp loại"]).reset_index()
+order = ["Lớp", "Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"]
+crosstab_df = crosstab_df[[col for col in order if col in crosstab_df.columns]]
 
-# Sắp xếp lại thứ tự cột cho hợp lý
-order = ["Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"]
-crosstab_df = crosstab_df.reindex(columns=[x for x in order if x in crosstab_df.columns])
+melted_df = crosstab_df.melt(id_vars="Lớp", var_name="Xếp loại", value_name="Số lượng")
 
-# Vẽ biểu đồ với viền đen
-crosstab_df.plot(
-    kind='bar', 
-    ax=ax_class, 
-    colormap='Set2',   # Dùng bảng màu Set2 cho đẹp, hoặc giữ nguyên
-    edgecolor='black', # VIỀN ĐEN Ở ĐÂY
-    linewidth=1.2
+fig_class = px.bar(
+    melted_df, 
+    x="Lớp", 
+    y="Số lượng", 
+    color="Xếp loại",
+    barmode="group", 
+    text_auto=True,
+    title="Thống kê Xếp loại sinh viên theo lớp",
+    color_discrete_sequence=px.colors.qualitative.Set2 
 )
-
-ax_class.set_xlabel("Lớp học")
-ax_class.set_ylabel("Số lượng sinh viên")
-plt.xticks(rotation=0)
-ax_class.legend(title="Xếp loại")
-ax_class.grid(True, linestyle='--', alpha=0.4, axis='y')
-st.pyplot(fig_class)
-
-# Sắp xếp lại thứ tự xếp loại cho logic từ cao xuống thấp (nếu cần)
-order = ["Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"]
-crosstab_df = crosstab_df.reindex(columns=[x for x in order if x in crosstab_df.columns])
-
-crosstab_df.plot(kind='bar', ax=ax5, colormap='viridis', edgecolor='black') # Vẽ bar chart với màu đẹp và viền đen
-
-# --- Phần Thêm mới để làm đẹp ---
-ax5.set_title("Thống kê Xếp loại sinh viên theo lớp", fontsize=14, fontweight='bold', pad=15)
-ax5.set_xlabel("Lớp học", fontweight='bold')
-ax5.set_ylabel("Số lượng sinh viên", fontweight='bold')
-ax5.legend(title="Xếp loại", frameon=True, edgecolor='black')
-ax5.grid(True, linestyle='--', alpha=0.5, axis='y')
-plt.xticks(rotation=0) # Để tên lớp nằm ngang cho dễ đọc
-for spine in ax5.spines.values():
-    spine.set_edgecolor('black')
-    spine.set_linewidth(1)
-# ---------------------------------
-
-st.pyplot(fig5)
+fig_class.update_traces(marker_line_color='black', marker_line_width=1)
+st.plotly_chart(fig_class, use_container_width=True)
 
 # ===== TOP =====
 st.subheader("🏆 Top sinh viên")
