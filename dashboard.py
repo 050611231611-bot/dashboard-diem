@@ -77,7 +77,12 @@ def classify(score):
 df["Xếp loại"] = df["Điểm_4"].apply(classify)
 
 # ===== SIDEBAR =====
-st.sidebar.header("🎛️ Bộ lọc")
+# 1. Thêm Tiêu đề/Logo thương hiệu nổi bật
+st.sidebar.markdown("<h2 style='text-align: center; color: #F5793A;'>🎓 EDU-ANALYTICS</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("---") # Đường gạch ngang phân cách
+
+# 2. Khu vực bộ lọc chính
+st.sidebar.header("🎛️ Bộ lọc dữ liệu")
 
 selected_class = st.sidebar.multiselect(
     "Chọn lớp",
@@ -89,10 +94,15 @@ min_score, max_score = st.sidebar.slider(
     "Khoảng điểm",
     0.0, 10.0, (0.0, 10.0)
 )
+
 selected_type_sidebar = st.sidebar.selectbox(
     "Chọn xếp loại",
     ["Tất cả", "Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"]
 ) 
+
+# 3. Thêm thông báo hướng dẫn UX ở cuối
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Mẹo:** Dùng bộ lọc để thu hẹp phạm vi phân tích. Các biểu đồ bên phải sẽ tự động cập nhật theo lựa chọn của bạn.")
 
 filtered_df = df[
     (df["Lớp"].isin(selected_class)) &
