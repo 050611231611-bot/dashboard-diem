@@ -13,15 +13,22 @@ def load_data():
     df_D13 = pd.read_csv("AMA301_2511_1_D13.csv")
     df_D14 = pd.read_csv("AMA301_2511_1_D14.csv")
 
+    # Gán lớp
     df_D05["Lớp"] = "D05"
     df_D12["Lớp"] = "D12"
     df_D13["Lớp"] = "D13"
     df_D14["Lớp"] = "D14"
 
-    df = pd.concat([df_D05, df_D12, df_D13, df_D14], ignore_index=True)
-    # Data dùng để phân tích
+    #  TẠO df_raw trong function
+    df_raw = pd.concat(
+        [df_D05, df_D12, df_D13, df_D14],
+        ignore_index=True
+    )
+
+    # Data phân tích
     df = df_raw.dropna(subset=["Thi_cuối_kì", "Điểm_tổng_hợp"])
-    return df
+
+    return df_raw, df
 df = load_data()
 
 # ===== PHÂN LOẠI =====
