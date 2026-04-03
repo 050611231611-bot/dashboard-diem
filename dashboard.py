@@ -17,7 +17,12 @@ color_map = {
     "D14": "#0F2080"
 } 
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Edu-Analytics | Phân tích chất lượng học tập môn Toán cao cấp 1", 
+    page_icon="🎓", 
+    layout="wide",
+    initial_sidebar_state="expanded" 
+)
 
 # ===== LOAD DATA =====
 @st.cache_data
@@ -78,7 +83,7 @@ df["Xếp loại"] = df["Điểm_4"].apply(classify)
 
 # ===== SIDEBAR =====
 # 1. Thêm Tiêu đề/Logo thương hiệu nổi bật
-st.sidebar.markdown("<h2 style='text-align: center; color: #F5793A;'>🎓 EDU-ANALYTICS</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("<h2 style='text-align: center; color: #F5793A;'>🎓 Group 5</h2>", unsafe_allow_html=True)
 st.sidebar.markdown("---") # Đường gạch ngang phân cách
 
 # 2. Khu vực bộ lọc chính
@@ -111,6 +116,15 @@ filtered_df = df[
 ]
 if selected_type_sidebar != "Tất cả":
     filtered_df = filtered_df[filtered_df["Xếp loại"] == selected_type_sidebar]
+
+# ---> THÊM ĐOẠN CODE NÀY VÀO <---
+if filtered_df.empty:
+    st.warning("⚠️ Không tìm thấy sinh viên nào thỏa mãn điều kiện lọc. Vui lòng điều chỉnh lại Lớp, Khoảng điểm hoặc Xếp loại ở Sidebar.")
+    st.stop() # Lệnh này sẽ dừng vẽ các biểu đồ bên dưới để tránh lỗi
+# ---------------------------------
+
+# ===== TITLE =====
+st.title("📊 DASHBOARD PHÂN TÍCH HỌC THUẬT (D05, D12, D13, D14)")
 
 # ===== TITLE =====
 st.title("📊 DASHBOARD PHÂN TÍCH HỌC THUẬT (D05, D12, D13, D14)")
