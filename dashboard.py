@@ -35,7 +35,6 @@ def load_data():
     )
 
    df = df_raw.copy()
-
     return df_raw, df
 
 df_raw, df = load_data()
