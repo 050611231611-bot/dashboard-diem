@@ -159,7 +159,7 @@ fig_box = px.box(
     y="Điểm_tổng_hợp", 
     color="Lớp",
     color_discrete_map=color_map,
-    points="all", 
+    points=False, # <--- Tắt hoàn toàn các chấm tròn
     title="Biểu đồ Boxplot: Khoảng phân tán điểm"
 )
 fig_box.update_traces(marker_line_color='black', marker_line_width=1)
