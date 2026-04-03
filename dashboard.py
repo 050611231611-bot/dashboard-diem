@@ -123,7 +123,7 @@ if filtered_df.empty:
     st.stop() # Lệnh này sẽ dừng vẽ các biểu đồ bên dưới để tránh lỗi
 # ---------------------------------
 # ===== TITLE =====
-st.title("📊PHÂN TÍCH CHẤT LƯỢNG HỌC TẬP MÔN TOÁN CAO CẤP 1 (D05, D12, D13, D14)")
+st.title("📊PHÂN TÍCH CHẤT LƯỢNG MÔN TOÁN CAO CẤP 1 (D05, D12, D13, D14)")
 # ===== THÔNG TIN HỌC PHẦN =====
 # 1. Khai báo từ điển lưu trữ thông tin thi của từng lớp
 course_info = {
