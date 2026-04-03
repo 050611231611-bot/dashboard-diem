@@ -7,8 +7,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-
-    color_map = {
+color_map = {
     "D05": "#F5793A",
     "D12": "#A95AA1",
     "D13": "#85C0F9",
@@ -96,7 +95,7 @@ filtered_df = df[
     (df["Điểm_tổng_hợp"] >= min_score) &
     (df["Điểm_tổng_hợp"] <= max_score)
 ]
- if selected_type_sidebar != "Tất cả":
+if selected_type_sidebar != "Tất cả":
     filtered_df = filtered_df[filtered_df["Xếp loại"] == selected_type_sidebar]
 # ===== TITLE =====
 st.title("📊 PHÂN TÍCH ĐIỂM SINH VIÊN (D05, D12, D13, D14)")
@@ -123,14 +122,14 @@ st.subheader("📈 Phân bố điểm")
 fig, ax = plt.subplots()
 for lop in selected_class:
     subset = filtered_df[filtered_df["Lớp"] == lop]
-    if len(subset) > 0:
-       ax.hist(
-    subset["Điểm_tổng_hợp"],
-    bins=10,
-    alpha=0.6,
-    label=lop,
-    color=color_map.get(lop)
-)
+if len(subset) > 0:
+    ax.hist(
+        subset["Điểm_tổng_hợp"],
+        bins=10,
+        alpha=0.6,
+        label=lop,
+        color=color_map.get(lop)
+    )
 ax.legend()
 ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 st.pyplot(fig)
