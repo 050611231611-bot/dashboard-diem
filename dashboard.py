@@ -29,7 +29,7 @@ def load_data():
     df = df_raw.dropna(subset=["Thi_cuối_kì", "Điểm_tổng_hợp"])
 
     return df_raw, df
-df = load_data()
+    df_raw, df = load_data()
 
 # ===== PHÂN LOẠI =====
 def classify(score):
